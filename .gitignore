@@ -1,0 +1,47 @@
+# Secrets & environment
+.env
+*.env
+**/.env
+backend/.env
+
+# Firebase / Google service credentials
+**/GoogleService-Info.plist
+**/google-services.json
+**/firebase-service-account.json
+**/firebase-adminsdk*.json
+firebase-debug.log
+
+# Node
+node_modules/
+**/node_modules/
+
+# Database dumps & user uploads
+mongodb_backup/
+**/mongodb_backup/
+uploads/
+backend/uploads/
+
+# Flutter / Dart build artifacts
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# IDE / OS
+*.iml
+.idea/
+.DS_Store
+**/.DS_Store
+.sync-conflict*
+
+# Local tooling
+
+# Generated platform files
+/android/local.properties
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/flutter_export_environment.sh
+/ios/Flutter/ephemeral/
+**/ios/Flutter/.last_build_id

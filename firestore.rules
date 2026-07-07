@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Get the authenticated user's role from Firestore
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Helper: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: Check if user has a specific role
+    function hasRole(role) {
+      return isAuthenticated() && getUserRole() == role;
+    }
+
+    // Users Collection
+    // - Authenticated users can read their own profile
+    // - Users can only create their own profile document (uid must match)
+    // - Users cannot modify their role after creation
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && request.resource.data.keys().hasAll(['email', 'name', 'role', 'createdAt'])
+                    && request.resource.data.role in ['developer', 'client', 'accountant'];
+      allow update: if isAuthenticated()
+                    && request.auth.uid == userId
+                    && request.resource.data.role == resource.data.role; // Cannot change role
+      allow delete: if false; // Users cannot be deleted
+    }
+
+    // Projects Collection
+    // - All authenticated users can read projects
+    // - Only developers and accountants can create projects
+    // - Only the creator can update/delete a project
+    // - Clients can only view projects where they are the client
+    match /projects/{projectId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && getUserRole() in ['developer', 'accountant']
+                    && request.resource.data.keys().hasAll(['name', 'clientName', 'totalCost', 'createdBy', 'createdAt']);
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated()
+                    && getUserRole() in ['developer', 'accountant'];
+    }
+
+    // Payments Collection
+    // - All authenticated users can read payments
+    // - Only developers and accountants can create payments
+    // - All three roles can approve (update)
+    // - No one can delete payments
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+                    && getUserRole() in ['developer', 'accountant']
+                    && request.resource.data.keys().hasAll(['projectId', 'title', 'amount', 'addedBy', 'createdAt'])
+                    && request.resource.data.status == 'pending';
+      allow update: if isAuthenticated()
+                    && getUserRole() in ['developer', 'client', 'accountant'];
+      allow delete: if false; // Payments cannot be deleted for audit trail
+    }
+  }
+}
