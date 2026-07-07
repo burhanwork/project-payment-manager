@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "========================================"
-echo " QuickBooks Payment Manager - Setup"
+echo " Project Payment Manager - Setup"
 echo "========================================"
 
 # 1. Install Node dependencies
@@ -12,7 +12,7 @@ npm install
 # 2. Restore MongoDB database
 echo ""
 echo "[2/3] Restoring MongoDB database..."
-mongorestore --db quickbooks mongodb_backup/quickbooks/
+mongorestore --db project_payment_manager <path-to-backup>
 echo "Database restored successfully."
 
 # 3. Start the server
